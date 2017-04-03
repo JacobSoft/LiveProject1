@@ -8,6 +8,8 @@ app.use (bodyParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 var urlencodedParser = bodyParser.urlencoded ({ extended: true })
+
+//configure database connection info:
     var config = {
         user: 'Jake',
         password: 'klpc1229',
@@ -20,6 +22,7 @@ var path = require('path'),
     fs = require('fs');
 module.exports = function(app, passport,server) {
     
+    //input form data into database:
 app.post('/subscribe', urlencodedParser, function (request, response) {  
             var firstname = request.body.firstname;
             console.log(firstname);
@@ -54,13 +57,33 @@ app.post('/subscribe', urlencodedParser, function (request, response) {
 response.redirect('/');
     
 });
- 
 
+// run query to see all records from database and log to console
+   app.get('/selectall', function (req, res) { 
+    
 
-    /*app.post('/subscribe', urlencodedParser, function(request, response) {
-    console.log(request.body.firstname);
-    /*    response.render('subscribe',{qs:request.query});  
-    });*/
+        var conn = new sql.Connection(config);
+        var req = new sql.Request(conn);
+        
+        conn.connect(function (err){
+           
+            if (err) {
+                
+                console.log(err);
+                return;
+            }
+               
+            req.query("SELECT * FROM Subscriber", function (err, recordset) { 
+                 if (err) { 
+                    console.log(err);
+                 }
+                else{
+                   console.log(recordset); 
+                }
+                conn.close();
+            });
+        });    
+});
     
 	app.get('/', function(request, response) {
 		response.render('index.html');
@@ -81,6 +104,9 @@ response.redirect('/');
 	});
 	app.get('/contact', function(request, response) {
 		response.render('contact.html');
+    });
+    app.get('/admin', function(request, response) {
+		response.render('admin.html');
 	});
 	app.get('/edit', auth, function(request, response) {
 		response.render('edit.html', {
